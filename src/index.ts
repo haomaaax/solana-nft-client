@@ -37,6 +37,30 @@ async function createNft(
   return nft
 }
 
+async function updateNft(
+  metaplex: Metaplex,
+  uri: string,
+  mintAddress: PublicKey
+) {
+  // get "NftWithToken" type from mint address
+  const nft = await metaplex.nfts().findByMint({ mintAddress })
+
+  // omit any fields to keep unchanged
+  await metaplex
+    .nfts()
+    .update({
+      nftOrSft: nft,
+      name: tokenName,
+      symbol: symbol,
+      uri: uri,
+      sellerFeeBasisPoints: sellerFeeBasisPoints,
+    })
+
+  console.log(
+    `Token Mint: https://explorer.solana.com/address/${nft.address.toString()}?cluster=devnet`
+  )
+}
+
 async function main() {
   const connection = new web3.Connection(web3.clusterApiUrl("devnet"))
   const user = await initializeKeypair(connection)
@@ -75,7 +99,13 @@ async function main() {
 
   console.log("PublicKey:", user.publicKey.toBase58())
 
-  await createNft(metaplex, uri)
+  // This is to create a new nft token
+  // await createNft(metaplex, uri)
+
+  // You can get this from the solana explorer URL
+  const mintAddress = new PublicKey("J8pxwZeydm8BRMEjUpyDjABdnLxbjXwkBYDqS9pzCHAx")
+  // This is to update existing nft token
+  await updateNft(metaplex, uri, mintAddress)
 }
 
 main()
